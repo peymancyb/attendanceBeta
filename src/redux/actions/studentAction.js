@@ -1,6 +1,6 @@
-export function studentAction(studentArray){
+export function studentAction(student){
   return{
-    type:'studentReducer',
-    payload: studentArray
+    type:'INSERTSTUDENT',
+    payload: student
   }
 };

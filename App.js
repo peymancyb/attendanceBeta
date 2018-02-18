@@ -11,22 +11,21 @@ import {
 import { Root } from "native-base";
 import {Provider} from 'react-redux';
 import store from './src/redux/index';
-
-// console.disableYellowBox = true;
+console.disableYellowBox = true;
 const App = StackNavigator({
-    // Login : {
-    //   screen: Login,
-    //   navigationOptions:{
-    //     //header on android has problems(solved)
-    //     headerStyle:{
-    //       backgroundColor:'white',
-    //       borderBottomWidth:0,
-    //       elevation: 0, //remove header shadow form android
-    //       shadowOpacity: 0, //remove header shadwo from ios
-    //     },
-    //   }
-    // },
-    // Register : { screen: Register },
+    Login : {
+      screen: Login,
+      navigationOptions:{
+        //header on android has problems(solved)
+        headerStyle:{
+          backgroundColor:'white',
+          borderBottomWidth:0,
+          elevation: 0, //remove header shadow form android
+          shadowOpacity: 0, //remove header shadwo from ios
+        },
+      }
+    },
+    Register : { screen: Register },
     ListClasses : {
       screen: ListClasses,
       navigationOptions:{

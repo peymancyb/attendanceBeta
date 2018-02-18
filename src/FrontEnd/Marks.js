@@ -9,8 +9,7 @@ import {
   FlatList,
   KeyboardAvoidingView} from 'react-native';
 import styles from './style';
-import fireBase from '../BackEnd/firebase';
-import {fireBaseClassNode} from './Classes';
+import fireBase,{database,auth} from '../BackEnd/firebase';
 import {MaterialCommunityIcons,SimpleLineIcons} from '@expo/vector-icons';
 import {
   Container,
@@ -31,27 +30,28 @@ import {
   Toast,
   Root,
 } from 'native-base';
+import {connect} from 'react-redux';
 
 let date = new Date();
 let dateString = `${date.getFullYear() +"-"+(date.getMonth() + 1)+"-"+ date.getDate()}`;
 let currentDate = dateString.toString();
 
-export default class Marks extends Component {
+class Marks extends Component {
   constructor(props){
     super(props);
     this.state = {
       students_array: [],
       Mark:null,
     };
-    this.currentUserUid = fireBase.auth().currentUser.uid;
-    this.itemsRef = fireBase.database().ref('user_classes/'+this.currentUserUid+'/class_list/'+fireBaseClassNode+'/studet_list');
     this._renderItem = this._renderItem.bind(this);
     this.listenForItems = this.listenForItems.bind(this);
     this._sendMark = this._sendMark.bind(this);
   }
 
   componentDidMount() {
-    this.listenForItems(this.itemsRef);
+    let currentUserUid = auth.currentUser.uid;
+    let studentReference = database.ref(`user_classes/${currentUserUid}/class_list/${this.props.classID}/studet_list`);
+    this.listenForItems(studentReference);
   }
   // Fetch Students referance
   listenForItems(itemsRef) {
@@ -71,16 +71,19 @@ _chandeText(mark){
 this.setState({Mark: mark});
 }
 _sendMark(item){
-  let RegisteryMarkRef = fireBase.database().ref("Registery/"+this.currentUserUid+"/"+fireBaseClassNode+"/"+item.user_id+"/Date/"+currentDate+"/status/");
+  let currentUserUid = auth.currentUser.uid;
+  let RegisteryMarkRef = database.ref(`Registery/${currentUserUid}/${this.props.classID}/${item.user_id}/Date/${currentDate}/status`);
   if(this.state.Mark === null || this.state.Mark === ''){
     Toast.show({
       text:"Please enter mark!",
       position:"bottom",
+      type:"warning",
     });
  }else{
    Toast.show({
      text:"Mark has been set!",
      position:"bottom",
+     type:"success",
    });
    RegisteryMarkRef.update({
        Mark: this.state.Mark
@@ -162,3 +165,10 @@ _sendMark(item){
     );
   }
 }
+
+export default connect((store)=>{
+  return{
+    classID: store.class.classID,
+    students: store.students
+  }
+})(Marks);

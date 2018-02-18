@@ -1,7 +1,7 @@
 import React ,{Component} from 'react';
 import {Text,View,TextInput, TouchableHighligh,FlatList ,TouchableOpacity} from 'react-native';
 import styles from './style';
-import fireBase from '../BackEnd/firebase';
+import fireBase,{database,auth} from '../BackEnd/firebase';
 import {StackNavigator , TabNavigator} from 'react-navigation';
 import Register from './Register';
 import {fireBaseClassNode} from './Classes';
@@ -23,10 +23,11 @@ import {
   Button,
 } from 'native-base';
 import ProfileHistory from './profileHistory';
+import {connect} from 'react-redux';
 
 export var userHistoryItem = {};
 
-export default class History extends Component {
+class History extends Component {
   static navigationOptions = {
     tabBarIcon: () => (
       <MaterialCommunityIcons name="history" size={22} color={"white"}/>
@@ -37,15 +38,15 @@ export default class History extends Component {
     this.state = {
       students_array: [],
     };
-    this.currentUserUid = fireBase.auth().currentUser.uid;
-    this.itemsRef = fireBase.database().ref('user_classes/'+this.currentUserUid+'/class_list/'+fireBaseClassNode+'/studet_list');
     this._renderItem = this._renderItem.bind(this);
     this.listenForItems = this.listenForItems.bind(this);
     this._navigateToProfile = this._navigateToProfile.bind(this);
   }
 
   componentDidMount() {
-    this.listenForItems(this.itemsRef);
+    let currentUserUid = auth.currentUser.uid;
+    let studentReference = database.ref(`user_classes/${currentUserUid}/class_list/${this.props.classID}/studet_list`);
+    this.listenForItems(studentReference);
   }
   _navigateToProfile(item){
     const { navigate } = this.props.navigation;
@@ -115,3 +116,9 @@ export default class History extends Component {
     );
   }
 }
+export default connect((store)=>{
+  return{
+    classID: store.class.classID,
+    students: store.students
+  }
+})(History);

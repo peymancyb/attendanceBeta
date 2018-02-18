@@ -27,7 +27,7 @@ import {
 } from 'native-base';
 import {Entypo,MaterialIcons} from '@expo/vector-icons';
 import ClassModal from './classModal';
-import fireBase,{database} from '../BackEnd/firebase';
+import fireBase,{database,auth} from '../BackEnd/firebase';
 import {connect} from 'react-redux';
 import {classID} from '../redux/actions/classAction';
 
@@ -50,7 +50,8 @@ class ListClasses extends Component {
   }
 
   componentDidMount() {
-    let classReference = database.ref('user_classes/xuKDcv8itdPnUGhLHjvaWfVEptm2/class_list/');
+    let currentUserUid = auth.currentUser.uid;
+    let classReference = database.ref(`user_classes/${currentUserUid}/class_list/`);
     this.setState({
       loading: true,
       refreshing:true,
@@ -78,7 +79,8 @@ class ListClasses extends Component {
   //=========================================================
   _navigateToStudent(item){
       let id = item.class_id;
-      this.props.dispatch(classID(id))
+      this.props.dispatch(classID(id));
+      this.props.dispatch({type:"RESET"});
       this.setState({
         loadingIndicator:true
       },()=>{
@@ -127,7 +129,8 @@ class ListClasses extends Component {
     };
 
     _handleRefresh(){
-      let classReference = database.ref('user_classes/xuKDcv8itdPnUGhLHjvaWfVEptm2/class_list/');
+      let currentUserUid = auth.currentUser.uid;
+      let classReference = database.ref(`user_classes/${currentUserUid}/class_list/`);
       this.setState({
         refreshing:true,
       },
@@ -171,6 +174,7 @@ class ListClasses extends Component {
 
 export default connect((store)=>{
   return{
-    classID: store.class
+    classID: store.class,
+    students: store.students
   }
 })(ListClasses);

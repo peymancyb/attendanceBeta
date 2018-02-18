@@ -1,9 +1,8 @@
 import React ,{Component} from 'react';
 import {Text,View,TextInput, TouchableOpacity,FlatList,KeyboardAvoidingView } from 'react-native';
 import styles from './style';
-import fireBase from '../BackEnd/firebase';
+import fireBase,{database,auth} from '../BackEnd/firebase';
 import {StackNavigator , TabNavigator} from 'react-navigation';
-import {fbDatabaseNodeName} from './Classes';
 import {MaterialCommunityIcons,EvilIcons,FontAwesome} from '@expo/vector-icons';
 import { Hoshi } from 'react-native-textinput-effects';
 import {
@@ -26,21 +25,20 @@ import {
   Root,
 } from 'native-base';
 import {fireBaseClassNode} from './Classes';
+import {connect} from 'react-redux';
+
 
 let date = new Date();
 let dateString = `${date.getFullYear() +"-"+(date.getMonth() + 1)+"-"+ date.getDate()}`;
 let currentDate = dateString.toString();
 
-export default class Comments extends Component {
+class Comments extends Component {
   constructor(props){
     super(props);
     this.state = {
       students_array: [],
       Comment:'',
     };
-    this.currentUserUid = fireBase.auth().currentUser.uid;
-    this.itemsRef = fireBase.database().ref('user_classes/'+this.currentUserUid+'/class_list/'+fireBaseClassNode+'/studet_list');
-
     this._renderItem = this._renderItem.bind(this);
     this.listenForItems = this.listenForItems.bind(this);
     this._sendComment = this._sendComment.bind(this);
@@ -48,7 +46,9 @@ export default class Comments extends Component {
   }
 
   componentDidMount() {
-    this.listenForItems(this.itemsRef);
+    let currentUserUid = auth.currentUser.uid;
+    let studentReference = database.ref(`user_classes/${currentUserUid}/class_list/${this.props.classID}/studet_list`);
+    this.listenForItems(studentReference);
   }
 
   // Fetch Students referance
@@ -66,17 +66,19 @@ export default class Comments extends Component {
     });
   }
   _sendComment(item){
-    let RegisteryCommentRef = fireBase.database().ref("Registery/"+this.currentUserUid+"/"+fireBaseClassNode+"/"+item.user_id+"/Date/"+currentDate+"/status/");
-
+    let currentUserUid = auth.currentUser.uid;
+    let RegisteryCommentRef = database.ref(`Registery/${currentUserUid}/${this.props.classID}/${item.user_id}/Date/${currentDate}/status`);
     if(this.state.Comment === null || this.state.Comment === ''){
       Toast.show({
        text:"Please write Comment!",
        position:"bottom",
+       type:"warning"
      });
    }else{
      Toast.show({
        text:"Comment has been set!",
        position:"bottom",
+       type:"success"
      });
      RegisteryCommentRef.update({
          Comment: this.state.Comment
@@ -142,3 +144,10 @@ export default class Comments extends Component {
     );
   }
 }
+
+export default connect((store)=>{
+  return{
+    classID: store.class.classID,
+    students: store.students
+  }
+})(Comments);

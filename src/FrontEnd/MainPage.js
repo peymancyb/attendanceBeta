@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import styles from './style';
-import fireBase, {database} from '../BackEnd/firebase';
+import fireBase, {database,auth} from '../BackEnd/firebase';
 import {fireBaseClassNode} from './Classes';
 import {Feather} from '@expo/vector-icons';
 import {
@@ -51,15 +51,16 @@ class MainPage extends Component {
   }
 //give students reference to the funtion
 componentDidMount() {
-  let studentReference = database.ref(`user_classes/xuKDcv8itdPnUGhLHjvaWfVEptm2/class_list/${this.props.classID}/studet_list`);
   this.setState({
     loading:true,
   },
-  ()=>this.listenForItems(studentReference));
+  ()=>this.listenForItems());
 }
 
 // Fetch Students referance
-listenForItems(studentReference) {
+listenForItems() {
+  let currentUserUid = auth.currentUser.uid;
+  let studentReference = database.ref(`user_classes/${currentUserUid}/class_list/${this.props.classID}/studet_list`);
   studentReference.on('value', (snap) => {
       var items = [];
       snap.forEach((child) => {
@@ -130,7 +131,6 @@ _handleRefresh(){
 }
 
   render() {
-    console.log("id: "+JSON.stringify(this.props.classID));
     return (
       <Container style={styles.BackgroundColor}>
         <Content>
@@ -164,6 +164,7 @@ _handleRefresh(){
 
 export default connect((store)=>{
   return{
-    classID: store.class.classID
+    classID: store.class.classID,
+    students: store.students
   }
 })(MainPage);

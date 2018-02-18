@@ -9,7 +9,7 @@ import {
   Alert,
   CheckBox } from 'react-native';
 import styles from '../style';
-import fireBase,{database} from '../../BackEnd/firebase';
+import fireBase,{database,auth} from '../../BackEnd/firebase';
 import {Entypo,Feather,MaterialIcons,EvilIcons} from '@expo/vector-icons';
 import {fireBaseClassNode} from '../Classes';
 import {
@@ -37,7 +37,10 @@ import {
   SwipeRow,
 } from 'native-base';
 import {connect} from 'react-redux';
+import {studentAction} from '../../redux/actions/studentAction';
+
 export var tempArr = [];
+
 
 let date = new Date();
 let dateString = `${date.getFullYear() +"-"+(date.getMonth() + 1)+"-"+ date.getDate()}`;
@@ -63,7 +66,7 @@ class PalButtons extends Component{
 }
 
 _storeData(currentData){
-  tempArr.push(currentData);
+  this.props.dispatch(studentAction(currentData));
 }
 
 _presentButton(props){
@@ -162,6 +165,7 @@ render(){
 
 export default connect((store)=>{
   return{
-    classID: store.class.classID
+    classID: store.class.classID,
+    students: store.students
   }
 })(PalButtons);

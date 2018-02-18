@@ -9,7 +9,7 @@ import {
    Button,
    ActivityIndicator} from 'react-native';
 import styles from './style';
-import fireBase,{database} from '../BackEnd/firebase';
+import fireBase,{database,auth} from '../BackEnd/firebase';
 import {
   Container,
   Content,
@@ -40,7 +40,8 @@ export default class ClassModal extends Component{
   }
 
   _saveClassData(){
-    let classReference = database.ref('user_classes/xuKDcv8itdPnUGhLHjvaWfVEptm2/class_list/');
+    let currentUserUid = auth.currentUser.uid;
+    let classReference = database.ref(`user_classes/${currentUserUid}/class_list/`);
     if(this.state.name != ''&& this.state.descreption != ''){
       classReference.push({class_name:this.state.name , descreption: this.state.descreption});
       Toast.show({

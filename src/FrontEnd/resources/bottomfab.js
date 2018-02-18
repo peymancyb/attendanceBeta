@@ -9,7 +9,7 @@ import {
   Alert,
   CheckBox } from 'react-native';
 import styles from '../style';
-import fireBase,{database} from '../../BackEnd/firebase';
+import fireBase,{database,auth} from '../../BackEnd/firebase';
 import {Entypo,Feather,MaterialIcons,EvilIcons} from '@expo/vector-icons';
 import {fireBaseClassNode} from '../Classes';
 import {
@@ -60,7 +60,7 @@ class BottomFab extends Component{
   }
 
 _resetItems(props){
-  tempArr=[];
+  this.props.dispatch({type:"RESET"});
   props.resetFlatlist();
 }
 
@@ -78,8 +78,9 @@ _handleState(childCall){
 
 //make an array is the solution
 _sendToFirebase(item){
-  let RegisteryDateRef = database.ref(`Registery/xuKDcv8itdPnUGhLHjvaWfVEptm2/${this.props.classID}/${item.user_id}/Date/${currentDate}`);
-  let RegisteryTotalRef = database.ref(`Registery/xuKDcv8itdPnUGhLHjvaWfVEptm2/${this.props.classID}/${item.user_id}/Total/`);
+  let currentUserUid = auth.currentUser.uid;
+  let RegisteryDateRef = database.ref(`Registery/${currentUserUid}/${this.props.classID}/${item.user_id}/Date/${currentDate}`);
+  let RegisteryTotalRef = database.ref(`Registery/${currentUserUid}/${this.props.classID}/${item.user_id}/Total/`);
 //============================================================================
   RegisteryDateRef.set({
     status: item
@@ -140,19 +141,15 @@ _sendToFirebase(item){
             position: 'bottom',
             type: "success",
       });
-
-//should reset the array
       return this._resetItems(this.props);
   }
 
 
 _sendData(props){
-  console.log("props.numberOfStudents: "+this.state.numberOfStudents );
-  console.log("tempArr.length: "+ tempArr.length);
-  //FIRST:check if we have already this item in the database
-  if (tempArr.length != 0 && tempArr.length == props.numberOfStudents) {
-    for (let i = 0; i < tempArr.length; i++) {
-      let RegisteryDateRef = database.ref(`Registery/xuKDcv8itdPnUGhLHjvaWfVEptm2/class_list/${this.props.classID}/${tempArr[i].user_id}/Date/`);
+  if (this.props.students.length != 0) {
+    for (let i = 0; i < this.props.students.length; i++) {
+      let currentUserUid = auth.currentUser.uid;
+      let RegisteryDateRef = database.ref(`Registery/${currentUserUid}/class_list/${this.props.classID}/${this.props.students[i].user_id}/Date/`);
         RegisteryDateRef.on('value',(snap)=>{
           snap.forEach((child)=>{
             if(child.key == currentDate){
@@ -162,6 +159,7 @@ _sendData(props){
                 return Toast.show({
                     text: "Submitted!",
                     position: "bottom",
+                    type: "warning",
                 });
               });
             }else{
@@ -171,24 +169,27 @@ _sendData(props){
             }
           });
           if(this.state.checkStatus == true){
-            return this._sendToFirebase(tempArr[i]);
+            return this._sendToFirebase(this.props.students[i]);
           }
         });
 
       }
     } else {
-        if (tempArr.length == 0) {
+        if (this.props.students.length == 0) {
             Toast.show({
                 text: "you did not select yet!",
                 position: "bottom",
+                type:"warning"
             });
         } else {
             Toast.show({
-                text: `${this.state.numberOfStudents - tempArr.length} students left!`,
+                text: `${this.state.numberOfStudents - this.props.students.length} students left!`,
                 position: "bottom",
+                type:"warning"
             });
         }
     }
+
   }
 
 componentWillReceiveProps(nextProps){
@@ -237,6 +238,7 @@ componentWillReceiveProps(nextProps){
 
 export default connect((store)=>{
   return{
-    classID: store.class.classID
+    classID: store.class.classID,
+    students: store.students
   }
 })(BottomFab);

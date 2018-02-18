@@ -9,7 +9,7 @@ import {
   Alert,
   CheckBox } from 'react-native';
 import styles from '../style';
-import fireBase,{database} from '../../BackEnd/firebase';
+import fireBase,{database,auth} from '../../BackEnd/firebase';
 import {Entypo,Feather,MaterialIcons,EvilIcons} from '@expo/vector-icons';
 import {fireBaseClassNode} from '../Classes';
 import {
@@ -65,14 +65,15 @@ class StudentModal extends Component{
   }
 
   _saveData(){
-    let studentRef = database.ref(`user_classes/xuKDcv8itdPnUGhLHjvaWfVEptm2/class_list/${this.props.classID}/studet_list`);
+    let currentUserUid = auth.currentUser.uid;
+    let studentRef = database.ref(`user_classes/${currentUserUid}/class_list/${this.props.classID}/studet_list`);
     if(this.state.name != '' && this.state.last_name != ''){
       studentRef.push({ name: this.state.name, last_name: this.state.last_name});
       let student_name = this.state.name +" "+this.state.last_name;
       let replaceSpecialCharactors = student_name.toString();
       let new_student = replaceSpecialCharactors.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
       //have all application students in one place
-      fireBase.database().ref('all_students/'+new_student).set({
+      database.ref('all_students/'+new_student).set({
         name: new_student
       });
       Toast.show({

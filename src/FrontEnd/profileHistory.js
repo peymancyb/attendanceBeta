@@ -17,17 +17,15 @@ import {
   CardItem,
 } from 'native-base';
 import styles from './style';
-import fireBase from '../BackEnd/firebase';
+import fireBase,{database,auth} from '../BackEnd/firebase';
 import {userHistoryItem} from './History';
-import {fireBaseClassNode} from './Classes';
 import {EvilIcons} from '@expo/vector-icons';
-
+import {connect} from 'react-redux';
 
 class DetailRow extends Component{
   constructor(props){
     super(props);
   }
-
   render(){
     return(
       <Body>
@@ -65,11 +63,7 @@ class DetailRow extends Component{
   }
 };
 
-
-
-
-
-export default class ProfileHistory extends Component{
+class ProfileHistory extends Component{
   constructor(props){
     super(props);
     this.state={
@@ -79,16 +73,6 @@ export default class ProfileHistory extends Component{
       lateNumber:0,
       historyArray:[],
     };
-    this.currentUserUid = fireBase.auth().currentUser.uid;
-
-    this.itemsRef = fireBase.database().ref("Registery/"+this.currentUserUid+"/"+fireBaseClassNode+"/"+userHistoryItem.user_id+"/Date/");
-    this.totalItemsRef = fireBase.database().ref("Registery/"+this.currentUserUid+"/"+fireBaseClassNode+"/"+userHistoryItem.user_id+"/Total/");
-    // let RegisteryTotalRef = FB.database().ref("Registery/"+this.currentUserUid+"/"+fireBaseClassNode+"/"+item.user_id+"/Total/");
-
-    // this.itemsRef = FB.database().ref('user_classes/'+this.currentUserUid+'/class_list/'+fireBaseClassNode+'/studet_list');
-    // this.itemsRef = FB.database().ref('test/'+CurrentUser+"/Date");
-    // this.totalItemsRef = FB.database().ref('test/'+CurrentUser+"/");
-
     this._showFullHistory = this._showFullHistory.bind(this);
     this._listenForItem = this._listenForItem.bind(this);
     this._renderHistory = this._renderHistory.bind(this);
@@ -96,12 +80,14 @@ export default class ProfileHistory extends Component{
   }
 
 componentDidMount(){
-  this._listenForItem(this.itemsRef);
-  this._checkForStatus(this.totalItemsRef);
+  this._listenForItem();
+  this._checkForStatus();
 }
 
-_checkForStatus(totalItemsRef){
-  return totalItemsRef.on('value',(snap)=>{
+_checkForStatus(){
+  let currentUserUid = auth.currentUser.uid;
+  let totalItemsRef = database.ref(`Registery/${currentUserUid}/${this.props.classID}/${userHistoryItem.user_id}/Total/`);
+  totalItemsRef.on('value',(snap)=>{
     snap.forEach(()=>{
       if (snap.val().total_present) {
         let newValue = snap.val().total_present;
@@ -125,7 +111,9 @@ _checkForStatus(totalItemsRef){
   });
 }
 
-_listenForItem(itemsRef){
+_listenForItem(){
+  let currentUserUid = auth.currentUser.uid;
+  let itemsRef = database.ref(`Registery/${currentUserUid}/${this.props.classID}/${userHistoryItem.user_id}/Date/`);
   itemsRef.on('value', (snap)=>{
     var items = [];
     snap.forEach((child)=>{
@@ -139,6 +127,7 @@ _listenForItem(itemsRef){
         Mark: child.val().status.Mark,
       });
     });
+    console.log(items);
     this.setState({
       historyArray: items,
     });
@@ -147,6 +136,7 @@ _listenForItem(itemsRef){
 
 
 _renderHistory({item}){
+  console.log(item);
   return(
     <CardItem
       style={styles.transparentBorderColor}>
@@ -173,7 +163,7 @@ _showFullHistory(itemsRef){
             style={styles.flatListStyle}
             data={this.state.historyArray}
             renderItem={this._renderHistory}
-            keyExtractor={item => item.user_id}
+            keyExtractor={item => `item${item.user_id}`}
           />
         </Card>
   );
@@ -205,3 +195,10 @@ render(){
     );
   }
 }
+
+export default connect((store)=>{
+  return{
+    classID: store.class.classID,
+    students: store.students
+  }
+})(ProfileHistory);

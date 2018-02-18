@@ -18,27 +18,27 @@ import {MaterialCommunityIcons,Feather,FontAwesome} from '@expo/vector-icons';
       tabBarIcon: () => (<Feather name="user-check" size={22} color={"white"}/>),
     }
   },
-  // Marks:{
-  //   screen: Marks,
-  //   paths:"/Marks",
-  //   navigationOptions:{
-  //     tabBarIcon: ()=>(<MaterialCommunityIcons name="numeric" size={22} color={"white"}/>),
-  //   }
-  // },
-  // Comments:{
-  //   screen: Comments,
-  //   paths:"/Comments",
-  //   navigationOptions:{
-  //     tabBarIcon: ()=>(<FontAwesome name="commenting-o" size={22} color={"white"}/>),
-  //   }
-  // },
-  // History:{
-  //   screen: History,
-  //   paths:"/History",
-  //   navigationOptions:{
-  //     tabBarIcon: ()=>(<FontAwesome name="commenting-o" size={22} color={"white"}/>),
-  //   }
-  // },
+  Marks:{
+    screen: Marks,
+    paths:"/Marks",
+    navigationOptions:{
+      tabBarIcon: ()=>(<MaterialCommunityIcons name="numeric" size={22} color={"white"}/>),
+    }
+  },
+  Comments:{
+    screen: Comments,
+    paths:"/Comments",
+    navigationOptions:{
+      tabBarIcon: ()=>(<FontAwesome name="commenting-o" size={22} color={"white"}/>),
+    }
+  },
+  History:{
+    screen: History,
+    paths:"/History",
+    navigationOptions:{
+      tabBarIcon: ()=>(<FontAwesome name="commenting-o" size={22} color={"white"}/>),
+    }
+  },
 },{
   backBehavior:"none",
   tabBarComponent: TabBarTop,
