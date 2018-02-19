@@ -150,7 +150,6 @@ _sendToFirebase(item){
 
 
 checkCondition(){
-  console.log('add');
   let currentUserUid = auth.currentUser.uid;
   for (let i = 0; i < this.props.students.length; i++) {
     let itemsRef = database.ref(`Registery/${currentUserUid}/${this.props.classID}/${this.props.students[i].user_id}/Date/`).limitToLast(1);
@@ -167,8 +166,6 @@ checkCondition(){
         }
       });
     });
-    console.log(date);
-
     }
 }
 
