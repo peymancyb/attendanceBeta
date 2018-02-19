@@ -57,6 +57,7 @@ class BottomFab extends Component{
     this._sendToFirebase = this._sendToFirebase.bind(this);
     this._handleState = this._handleState.bind(this);
     this._resetItems = this._resetItems.bind(this);
+    this.checkCondition = this.checkCondition.bind(this);
   }
 
 _resetItems(props){
@@ -145,51 +146,50 @@ _sendToFirebase(item){
   }
 
 
+
+
+
+checkCondition(){
+  console.log('add');
+  let currentUserUid = auth.currentUser.uid;
+  for (let i = 0; i < this.props.students.length; i++) {
+    let itemsRef = database.ref(`Registery/${currentUserUid}/${this.props.classID}/${this.props.students[i].user_id}/Date/`).limitToLast(1);
+    itemsRef.on('value', (snap)=>{
+      snap.forEach((child) => {
+        if(child.key === currentDate){
+           Toast.show({
+              text: "you have already submitted!",
+              position: "bottom",
+              type: "warning",
+          });
+        }else{
+           this._sendToFirebase(this.props.students[i]);
+        }
+      });
+    });
+    console.log(date);
+
+    }
+}
+
 _sendData(props){
   if (this.props.students.length != 0) {
-    for (let i = 0; i < this.props.students.length; i++) {
-      let currentUserUid = auth.currentUser.uid;
-      let RegisteryDateRef = database.ref(`Registery/${currentUserUid}/class_list/${this.props.classID}/${this.props.students[i].user_id}/Date/`);
-        RegisteryDateRef.on('value',(snap)=>{
-          snap.forEach((child)=>{
-            if(child.key == currentDate){
-              this.setState({
-                checkStatus:false,
-              },()=>{
-                return Toast.show({
-                    text: "Submitted!",
-                    position: "bottom",
-                    type: "warning",
-                });
-              });
-            }else{
-              this.setState({
-                checkStatus:true,
-              });
-            }
-          });
-          if(this.state.checkStatus == true){
-            return this._sendToFirebase(this.props.students[i]);
-          }
+      return this.checkCondition();
+    }else{
+      if(this.props.students.length == 0) {
+        return Toast.show({
+            text: "you did not select yet!",
+            position: "bottom",
+            type:"warning"
         });
-
+      }else{
+        return Toast.show({
+            text: `${this.state.numberOfStudents - this.props.students.length} students left!`,
+            position: "bottom",
+            type:"warning"
+        });
       }
-    } else {
-        if (this.props.students.length == 0) {
-            Toast.show({
-                text: "you did not select yet!",
-                position: "bottom",
-                type:"warning"
-            });
-        } else {
-            Toast.show({
-                text: `${this.state.numberOfStudents - this.props.students.length} students left!`,
-                position: "bottom",
-                type:"warning"
-            });
-        }
     }
-
   }
 
 componentWillReceiveProps(nextProps){
