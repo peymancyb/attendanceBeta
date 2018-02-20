@@ -150,23 +150,23 @@ _sendToFirebase(item){
 
 
 checkCondition(){
-  let currentUserUid = auth.currentUser.uid;
   for (let i = 0; i < this.props.students.length; i++) {
+    let currentUserUid = auth.currentUser.uid;
+    var temp;
     let itemsRef = database.ref(`Registery/${currentUserUid}/${this.props.classID}/${this.props.students[i].user_id}/Date/`).limitToLast(1);
     itemsRef.on('value', (snap)=>{
-      snap.forEach((child) => {
-        if(child.key === currentDate){
-           Toast.show({
-              text: "you have already submitted!",
-              position: "bottom",
-              type: "warning",
-          });
-        }else{
-           this._sendToFirebase(this.props.students[i]);
-        }
-      });
+      snap.forEach((child) => temp = child.key);
+      if(temp === currentDate){
+         return Toast.show({
+            text: "you have already submitted!",
+            position: "bottom",
+            type: "warning",
+        });
+      }else{
+        return this._sendToFirebase(this.props.students[i]);
+      }
     });
-    }
+  }
 }
 
 _sendData(props){
